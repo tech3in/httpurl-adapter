@@ -1,5 +1,6 @@
 package ex.niit.dev.customadapterexample;
 
+import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -22,19 +23,24 @@ import javax.net.ssl.HttpsURLConnection;
 
 public class MainActivity extends AppCompatActivity {
 
-    private ArrayList<String> titles = new ArrayList<String>();
-    private ArrayAdapter<String> adapter;
+
+
+    private ListView listView;
+    private ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        ListView listView = (ListView)findViewById(R.id.listView);
-        adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,titles);
-        listView.setAdapter(adapter);
+        listView = (ListView)findViewById(R.id.listView);
+
+        progressDialog = ProgressDialog.show(this,"Loading","Contacting Server");
         WebService webService = new WebService();
         webService.execute("https://jsonplaceholder.typicode.com/posts");
+
+
+
     }
 
 
@@ -44,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
+
         }
 
         @Override
@@ -86,14 +93,13 @@ public class MainActivity extends AppCompatActivity {
             //titles = new ArrayList<String>();
             try {
                 JSONArray jsonArray = new JSONArray(s);
-                for (int i = 0; i< jsonArray.length(); i++){
-                    Log.w("Title",jsonArray.getJSONObject(i).getString("title"));
-                    titles.add(jsonArray.getJSONObject(i).getString("title"));
-                }
-                adapter.notifyDataSetChanged();
+                JsonAdapter adapter = new JsonAdapter(MainActivity.this,jsonArray);
+                listView.setAdapter(adapter);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
+
+            progressDialog.dismiss();
 
         }
     }
